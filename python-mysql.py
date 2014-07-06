@@ -13,7 +13,7 @@ create_table_sql='''CREATE TABLE erp.account_inv (
 
 cursor.execute(create_table_sql)
 
-insert_sql='''3.INSERT INTO erp.account_inv (inv_no, product, amount) VALUES ('SAJ001', 'PEPSI', '12');'''
+insert_sql='''INSERT INTO erp.account_inv (inv_no, product, amount) VALUES ('SAJ001', 'PEPSI', '12');'''
 cursor.execute(insert_sql)
 
 select_sql='''SELECT * FROM erp.account_inv'''
