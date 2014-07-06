@@ -40,28 +40,69 @@ class erp_mysql(osv.osv):
         'password': fields.char('Password Name', size=64, required=True),
         'db_name': fields.char('Your Database', size=64, required=True),
         'table_name': fields.char('Table Name', size=64, required=True),
-
+        'type': fields.selection([('sale.order', 'Sale Order'), ('purchase.order', 'Purchase order'),\
+                                   ('account.invoice', 'Invoice')], 'Objects'),
+        'active_bool': fields.boolean('Create Database /Tables'),
     }
-    def action_button_confirm(self, cr, uid, ids, context=None):
+    def sync_data(self, cr, uid, ids, context=None):
         
-        import ipdb;ipdb.set_trace()
-        account_inv_obj=self.pool.get('account.invoice')
+        
+        
         config_obj=self.browse(cr,uid,ids[0])
+        account_inv_obj=self.pool.get(config_obj.type)
+        account_inv_line_obj=self.pool.get('account.invoice.line')
+#conenct to mysql        
         try:
             db = MySQLdb.connect(host=config_obj.host,user=config_obj.user,passwd=config_obj.password)
         except Exception as e:
             print e
         cursor = db.cursor()
+#create new database
+        #import ipdb;ipdb.set_trace()
+        create_db=str('''CREATE DATABASE {};'''.format(config_obj.db_name))  
+        cursor.execute(create_db)      
+#create a new table in Mysql
+        create_table_sql=str('''CREATE TABLE {}.{}\
+(erp_mysql_map INT NOT NULL,\
+inv_no VARCHAR(45) NOT NULL,\
+customer VARCHAR(45) NOT NULL,\
+product VARCHAR(45) NOT NULL,\
+price FLOAT NOT NULL,\
+qty FLOAT NOT NULL,\
+amount FLOAT NOT NULL,\
+state VARCHAR(45) NOT NULL\
+);'''.format(config_obj.db_name,config_obj.table_name))
+         
+        cursor.execute(create_table_sql) 
+                     
+        
         account_inv_ids=account_inv_obj.search(cr,uid,[])
         for i in account_inv_ids:
-            account_inv_data=account_inv_obj.browse(cr,uid,i)
-            sync_query=str('''INSERT INTO {}.{} (inv_no,customer,product,price,qty,amount,state)'''.format())
-            '''INSERT INTO erp.account_inv (inv_no, customer,product,price,qty ,amount,state) VALUES \
-            ('{}', '{}','{}', '{}','{}','{}','{}');'''.format(account_inv_data.number,account_inv_data.name,account_inv_data.product)
-            
+            account_line_ids=account_inv_line_obj.search(cr,uid,[('invoice_id','=',i)])
+            for j in account_line_ids:
+                account_inv_data,account_line_data=account_inv_obj.browse(cr,uid,i),account_inv_line_obj.browse(cr,uid,j)
+                
+                insert_sql=str('''INSERT INTO {}.{}\
+(erp_mysql_map,inv_no, customer,product,price,qty,\
+ amount,state) \
+VALUES ('{}','{}','{}','{}',{},{},{},'{}');'''\
+.format(config_obj.db_name,config_obj.table_name,i,account_inv_data.number,\
+account_inv_data.partner_id.name,account_line_data.product_id.name,account_line_data.price_unit,\
+account_line_data.quantity,account_inv_data.amount_total,account_inv_data.state))
+                 
+                cursor.execute(insert_sql)
+        db.commit()
+        db.close()
         
-            
-        
-        
+        raise osv.except_osv(
+                _('Synchronization Completed'),
+                _('Please check your Mysql Database')
+            )
+        return True
+             
 
+
+
+        
+                
 erp_mysql()
