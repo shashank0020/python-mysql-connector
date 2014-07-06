@@ -24,6 +24,7 @@
                     <field name="host" />
                     <field name="user"/>
                     <field name="password"/>                                      
+                    <field name="type"/>
                 </tree>
             </field>
         </record>
@@ -34,7 +35,9 @@
             <field name="arch" type="xml">
                 <form string="ERP_Mysql Configuration" version="7.0">
                     <header>
-                        <button name="action_button_confirm"  string="Confirm Sale" class="oe_highlight" type="object" groups="base.group_user"/>
+                        <button name="sync_data" icon="STOCK_REDO" string="Synchronize Data" class="oe_highlight_mysql_1" type="object" groups="base.group_user"/>
+                        <button name="%(action_erp_mysql_test_connection)d" icon="STOCK_DISCONNECT"
+                                type='action' class="oe_highlight_mysql_2" string='Test Connection'/>
                 </header>
                 <sheet>
   <!--                    <h1>
@@ -42,19 +45,30 @@
                         <label string="Sales Order " attrs="{'invisible': [('state','in',('draft','sent'))]}"/>
                         <field name="name" class="oe_inline" readonly="1"/>
                     </h1>-->
+                    <group col="2">
+                    <group colspan="1">
+                    <h1> <field name="name" colspan="1" class="oe_inline" placeholder="Instance Name..." /></h1>
+                    </group  >  
+                    <group colspan="1">
+                    <h1><separator string="Database config"/></h1>
+                    </group>
+                    </group>
                     <group>
+                   
                         <group >
-                            <field name="name" colspan="2"/>
+                            
                             <field name="host" colspan="2"/>
                             <field name="user" colspan="2" />
                             <field name="password" colspan="2"/>
                         </group>
+                        
                         <group >
-                            <separator colspan="2" string="Database config"/>
+                        
                             
-                            <newline/>
-                             <field name="db_name" colspan="2"/>
-                             <field name="table_name" colspan="2"/>
+                            <field name="type"/>
+                             <field name="active_bool" colspan="2" invisible="1" attrs="{'invisible': [('type','=', False)]}"/>                         
+                             <field name="db_name" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
+                             <field name="table_name" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                         </group>
                             
                         
