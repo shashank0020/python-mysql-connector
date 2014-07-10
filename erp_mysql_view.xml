@@ -35,10 +35,16 @@
             <field name="arch" type="xml">
                 <form string="ERP_Mysql Configuration" version="7.0">
                     <header>
-                        <button name="sync_data" icon="STOCK_REDO" string="Synchronize Data" class="oe_highlight_mysql_1" type="object" context="{'active_id': active_id}" groups="base.group_user"/>
+                        <button name="sync_data" icon="STOCK_REDO" string="Synchronize Data" class="oe_highlight_mysql_1" type="object" groups="base.group_user"/>
                         <button name="%(action_erp_mysql_test_connection)d" icon="STOCK_DISCONNECT"
                                 type='action' class="oe_highlight_mysql_2" string='Test Connection'/>
+                                
+						<button name="mymod_new" type="object" string="set to draft" states="negotiation" />
+						<button name="mymod_assigned" type="object" string="confirm" states="new" />
+						<button name="mymod_negotiation" type="object" string="done" states="assigned" />
+						<field name="state" widget="statusbar" statusbar_visible="new,assigned,negotiation" statusbar_colors='{"assigned":"red","negotiation":"red"}'/>						                                
                 </header>
+
                 <sheet>
   <!--                    <h1>
                         <label string="Quotation " attrs="{'invisible': [('state','not in',('draft','sent'))]}"/>
@@ -75,7 +81,7 @@
                              <field name="product" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              <field name="price" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              <field name="qty" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
-                             <field name="state" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
+                             <field name="states" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              
                              
                         </group>
