@@ -43,9 +43,28 @@ class erp_mysql(osv.osv):
         'type': fields.selection([('sale.order', 'Sale Order'), ('purchase.order', 'Purchase order'),\
                                    ('account.invoice', 'Invoice')], 'Objects'),
         'active_bool': fields.boolean('Create Database /Tables'),
-    }
-    def sync_data(self, cr, uid, ids, context=None):
+        'inv_no': fields.char('Document Number', size=64, required=True),
+        'customer': fields.char('Partner', size=64, required=True),
+        'product': fields.char('Product', size=64, required=True),
+        'price': fields.char('Price', size=64, required=True),
+        'qty': fields.char('Qty', size=64, required=True),
+        'state': fields.char('State', size=64, required=True),
         
+    }
+    def cron_func(self,cr,uid):
+        ''' Running scheduler for Sync'''
+        context={'cron_job':True}
+        
+        self_id=self.search(cr,uid,[])
+        
+        for ids in self_id:
+            self.sync_data(cr, uid, [ids], context)
+        return True
+
+    
+    def sync_data(self, cr, uid, ids, context):
+        '''Sync between OpenERP -Mysql '''
+    
         
         map_ids=[]
         config_obj=self.browse(cr,uid,ids[0])        
@@ -90,13 +109,15 @@ class erp_mysql(osv.osv):
 #create a new table in Mysql
         create_table_sql=str('''CREATE TABLE {}.{}\
 (erp_mysql_map INT NOT NULL,\
-inv_no VARCHAR(45) NOT NULL,\
-customer VARCHAR(45) NOT NULL,\
-product VARCHAR(45) NOT NULL,\
-price FLOAT NOT NULL,\
-qty FLOAT NOT NULL,\
-state VARCHAR(45) NOT NULL\
-);'''.format(config_obj.db_name,config_obj.table_name))
+{} VARCHAR(45) NOT NULL,\
+{} VARCHAR(45) NOT NULL,\
+{} VARCHAR(45) NOT NULL,\
+{} FLOAT NOT NULL,\
+{} FLOAT NOT NULL,\
+{} VARCHAR(45) NOT NULL\
+);'''.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,config_obj.customer,config_obj.product,config_obj.price,\
+             config_obj.qty,config_obj.state))
+        
         
         try: 
             cursor.execute(create_table_sql)
@@ -111,36 +132,113 @@ state VARCHAR(45) NOT NULL\
         map_list=[ij[0] for ij in result]
             
         
+        #fetch records from erp according to object selected
         
-        account_inv_ids=order_obj.search(cr,uid,[])
-        for i in account_inv_ids:
-            account_line_ids=order_line_obj.search(cr,uid,[('invoice_id','=',i)])
-            for j in account_line_ids:
-                account_inv_data,account_line_data=order_obj.browse(cr,uid,i),order_line_obj.browse(cr,uid,j)
-                if i in map_list:
-                    import ipdb;ipdb.set_trace()
-                    update_sql=str('''update {}.{} set state='{}' where erp_mysql_map={} '''\
-.format(config_obj.db_name,config_obj.table_name,account_inv_data.state,i))
-                    cursor.execute(update_sql)
-                else:
-                
-                    insert_sql=str('''INSERT INTO {}.{}\
-    (erp_mysql_map,inv_no, customer,product,price,qty,\
-    state) \
-    VALUES ('{}','{}','{}','{}',{},{},'{}');'''\
-    .format(config_obj.db_name,config_obj.table_name,i,account_inv_data.number,\
-    account_inv_data.partner_id.name,account_line_data.product_id.name,account_line_data.price_unit,\
-    account_line_data.quantity,account_inv_data.state))
+        if config_obj.type=='sale.order':
+            order_ids=order_obj.search(cr,uid,[])
+            for i in order_ids:
+                order_line_ids=order_line_obj.search(cr,uid,[('order_id','=',i)])
+                for j in order_line_ids:
+                    order_data,order_line_data=order_obj.browse(cr,uid,i),order_line_obj.browse(cr,uid,j)
+                    if i in map_list:
                     
-                     
-                    cursor.execute(insert_sql)
-            db.commit()
-            db.close()
+                        update_sql=str('''UPDATE {}.{} SET {}='{}', {}='{}' where erp_mysql_map={} '''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,order_data.name,config_obj.state,order_data.state,i))
+                        cursor.execute(update_sql)
+                    
+                    else:
+                
+                        insert_sql=str('''INSERT INTO {}.{}\
+(erp_mysql_map,{}, {},{},{},{},\
+{}) \
+VALUES ('{}','{}','{}','{}',{},{},'{}');'''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,config_obj.customer,config_obj.product,config_obj.price,\
+config_obj.qty,config_obj.state,i,order_data.name,\
+order_data.partner_id.name,order_line_data.product_id.name,order_line_data.price_unit,\
+order_line_data.product_uom_qty,order_data.state))
+                    
+                    
+                        cursor.execute(insert_sql)
+            
+            
+            
+            
+        elif config_obj.type=='purchase.order':  
+            order_ids=order_obj.search(cr,uid,[])
+            for i in order_ids:
+                order_line_ids=order_line_obj.search(cr,uid,[('order_id','=',i)])
+                for j in order_line_ids:
+                    order_data,order_line_data=order_obj.browse(cr,uid,i),order_line_obj.browse(cr,uid,j)
+                    if i in map_list:
+                    
+                        update_sql=str('''UPDATE {}.{} SET {}='{}', {}='{}' where erp_mysql_map={} '''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,order_data.name,config_obj.state,order_data.state,i))
+                        cursor.execute(update_sql)
+                    
+                    else:
+                
+                        insert_sql=str('''INSERT INTO {}.{}\
+(erp_mysql_map,{}, {},{},{},{},\
+{}) \
+VALUES ('{}','{}','{}','{}',{},{},'{}');'''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,config_obj.customer,config_obj.product,config_obj.price,\
+config_obj.qty,config_obj.state,i,order_data.name,\
+order_data.partner_id.name,order_line_data.product_id.name,order_line_data.price_unit,\
+order_line_data.product_qty,order_data.state))
+                    
+                    
+                        cursor.execute(insert_sql)
         
-        raise osv.except_osv(
-                _('Synchronization Completed'),
-                _('Please check your Mysql Database')
+        
+        
+        elif config_obj.type=='account.invoice':
+            account_inv_ids=order_obj.search(cr,uid,[])
+            for i in account_inv_ids:
+                account_line_ids=order_line_obj.search(cr,uid,[('invoice_id','=',i)])
+                for j in account_line_ids:
+                    account_inv_data,account_line_data=order_obj.browse(cr,uid,i),order_line_obj.browse(cr,uid,j)
+                    if i in map_list:
+                    
+                        update_sql=str('''UPDATE {}.{} SET {}='{}', {}='{}' where erp_mysql_map={} '''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,account_inv_data.number,config_obj.state,account_inv_data.state,i))
+                        cursor.execute(update_sql)
+                    
+                    else:
+                
+                        insert_sql=str('''INSERT INTO {}.{}\
+(erp_mysql_map,{}, {},{},{},{},\
+{}) \
+VALUES ('{}','{}','{}','{}',{},{},'{}');'''\
+.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,config_obj.customer,config_obj.product,config_obj.price,\
+config_obj.qty,config_obj.state,i,account_inv_data.number,\
+account_inv_data.partner_id.name,account_line_data.product_id.name,account_line_data.price_unit,\
+account_line_data.quantity,account_inv_data.state))
+                    
+                    
+                        cursor.execute(insert_sql)
+            
+        else:
+            raise osv.except_osv(
+                _('No object or Incorrect object is choosen !'),
+                _('Please select object to proceed.')
             )
+    
+            
+            
+        
+                    
+        db.commit()
+        db.close()
+        
+        if context.get('cron_job',False)==True:
+            
+            print 'Synchronization Completed\n Please check your Mysql Database'
+        else:
+            
+            raise osv.except_osv(
+                    _('Synchronization Completed'),
+                    _('Please check your Mysql Database')
+                )
         return True
              
 
