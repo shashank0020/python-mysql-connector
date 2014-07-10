@@ -48,12 +48,37 @@ class erp_mysql(osv.osv):
         'product': fields.char('Product', size=64, required=True),
         'price': fields.char('Price', size=64, required=True),
         'qty': fields.char('Qty', size=64, required=True),
-        'state': fields.char('State', size=64, required=True),
+        'states': fields.char('State', size=64, required=True),
+        'state': fields.selection([
+    ('new','New'),
+    ('assigned','Assigned'),
+    ('negotiation','Negotiation')
+    ], 'Stage', readonly=True),
         
     }
+    
+    def mymod_new(self, cr, uid, ids,context):
+        
+        self.write(cr, uid, ids, { 'state' : 'new' })
+        return True
+    
+    def mymod_assigned(self, cr, uid, ids,context):
+        
+        self.write(cr, uid, ids, { 'state' : 'assigned' })
+        return True
+    
+    def mymod_negotiation(self, cr, uid, ids,context):
+        
+        self.write(cr, uid, ids, { 'state' : 'negotiation' })
+        return True
+    
+
+
+    
     def cron_func(self,cr,uid):
         ''' Running scheduler for Sync'''
         context={'cron_job':True}
+        
         
         self_id=self.search(cr,uid,[])
         
@@ -118,7 +143,7 @@ class erp_mysql(osv.osv):
 );'''.format(config_obj.db_name,config_obj.table_name,config_obj.inv_no,config_obj.customer,config_obj.product,config_obj.price,\
              config_obj.qty,config_obj.state))
         
-        
+        #import ipdb;ipdb.set_trace()
         try: 
             cursor.execute(create_table_sql)
         except Exception as e:
