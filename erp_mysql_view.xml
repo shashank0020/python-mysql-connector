@@ -39,10 +39,10 @@
                         <button name="%(action_erp_mysql_test_connection)d" icon="STOCK_DISCONNECT"
                                 type='action' class="oe_highlight_mysql_2" string='Test Connection'/>
                                 
-						<button name="mymod_new" type="object" string="set to draft" states="negotiation" />
-						<button name="mymod_assigned" type="object" string="confirm" states="new" />
-						<button name="mymod_negotiation" type="object" string="done" states="assigned" />
-						<field name="state" widget="statusbar" statusbar_visible="new,assigned,negotiation" statusbar_colors='{"assigned":"red","negotiation":"red"}'/>						                                
+						<button name="mymod_new1" type="workflow" string="set to draft" states="negotiation" />
+						<button name="mymod_assigned1" worftype="workflow" string="confirm" states="new" />
+						<button name="mymod_negotiation1" type="workflow" string="done" states="assigned" />
+						<field name="state" widget="statusbar" statusbar_visible="new,assigned,negotiation" statusbar_colors='{"new":"green","assigned":"orange","negotiation":"yellow"}'/>						                                
                 </header>
 
                 <sheet>
@@ -154,4 +154,5 @@
 
     </data>
 </openerp>
+
 
