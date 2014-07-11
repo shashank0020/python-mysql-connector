@@ -56,18 +56,23 @@ class erp_mysql(osv.osv):
     ], 'Stage', readonly=True),
         
     }
+    _defaults = {'state':'new'
+}                     
     
-    def mymod_new(self, cr, uid, ids,context):
+    def mymod_new(self, cr, uid, ids):
+        import ipdb;ipdb.set_trace()
         
         self.write(cr, uid, ids, { 'state' : 'new' })
         return True
     
-    def mymod_assigned(self, cr, uid, ids,context):
+    def mymod_assigned(self, cr, uid, ids):
+        import ipdb;ipdb.set_trace()
         
         self.write(cr, uid, ids, { 'state' : 'assigned' })
         return True
     
-    def mymod_negotiation(self, cr, uid, ids,context):
+    def mymod_negotiation(self, cr, uid, ids):
+        import ipdb;ipdb.set_trace()
         
         self.write(cr, uid, ids, { 'state' : 'negotiation' })
         return True
@@ -272,3 +277,4 @@ account_line_data.quantity,account_inv_data.state))
         
                 
 erp_mysql()
+
