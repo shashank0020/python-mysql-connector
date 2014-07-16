@@ -66,6 +66,7 @@
                             <field name="host" colspan="2"/>
                             <field name="user" colspan="2" />
                             <field name="password" colspan="2"/>
+                            <field name="x_int" colspan="2"/>
                         </group>
                         
                         <group >
