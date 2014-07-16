@@ -33,31 +33,49 @@ import MySQLdb
 class erp_mysql(osv.osv):
     _name = "erp.mysql"
     _description = "ERP Mysql configuration"
+    def _constrain_check(self,cr,uid,ids):
+       # import ipdb;ipdb.set_trace()
+        rec=self.browse(cr,uid,ids[0])
+        if rec.x_int<0:
+            return False
+        return True
+    
     _columns = {
-        'name': fields.char('Instance Name', size=64, required=True),
-        'host': fields.char('Host Name', size=64, required=True),
-        'user': fields.char('User Name', size=64, required=True),
-        'password': fields.char('Password Name', size=64, required=True),
-        'db_name': fields.char('Your Database', size=64, required=True),
-        'table_name': fields.char('Table Name', size=64, required=True),
+        'name': fields.char('Instance Name', select=2,size=64, required=False),
+        'host': fields.char('Host Name',size=64, required=False),
+        'user': fields.char('User Name', size=64, required=False),
+        'password': fields.char('Password Name', size=64, required=False),
+        'db_name': fields.char('Your Database', size=64, required=False),
+        'table_name': fields.char('Table Name', size=64, required=False),
         'type': fields.selection([('sale.order', 'Sale Order'), ('purchase.order', 'Purchase order'),\
                                    ('account.invoice', 'Invoice')], 'Objects'),
         'active_bool': fields.boolean('Create Database /Tables'),
-        'inv_no': fields.char('Document Number', size=64, required=True),
-        'customer': fields.char('Partner', size=64, required=True),
-        'product': fields.char('Product', size=64, required=True),
-        'price': fields.char('Price', size=64, required=True),
-        'qty': fields.char('Qty', size=64, required=True),
-        'states': fields.char('State', size=64, required=True),
+        'inv_no': fields.char('Document Number', size=64, required=False),
+        'customer': fields.char('Partner', size=64, required=False),
+        'product': fields.char('Product', size=64, required=False),
+        'price': fields.char('Price', size=64, required=False),
+        'qty': fields.char('Qty', size=64, required=False),
+        'states': fields.char('State', size=64, required=False),
         'state': fields.selection([
     ('new','New'),
     ('assigned','Assigned'),
     ('negotiation','Negotiation')
     ], 'Stage', readonly=True),
+    'x_int': fields.integer('x_int'),                
         
     }
+    _log_access=True
+    _order='name'
+    _rec_name='host'
+    _constraints = [
+        (_constrain_check, 'Number should be positive.', ['x_int']),
+    ]
+    _sql_constraints = [('deduction_registration_name_unique', 'unique(name)', 'Instance name Already exist')]
     _defaults = {'state':'new'
 }                     
+    
+
+    
     
     def mymod_new(self, cr, uid, ids):
         import ipdb;ipdb.set_trace()
