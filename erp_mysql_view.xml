@@ -67,6 +67,12 @@
                             <field name="user" colspan="2" />
                             <field name="password" colspan="2"/>
                             <field name="x_int" colspan="2"/>
+                            <field name="start_date" colspan="2"/>
+                            <field name="end_date" colspan="2"/>
+                            <field name="ref" colspan="2"/>
+                            <field name="partner_id" colspan="2"/>
+                            <field name="many" colspan="2"/>
+                            
                         </group>
                         
                         <group >
@@ -75,6 +81,7 @@
                             <field name="type"/>
                              <field name="active_bool" colspan="2" invisible="1" attrs="{'invisible': [('type','=', False)]}"/>                         
                              <field name="db_name" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
+                             
                              <field name="table_name" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              
                              <field name="inv_no" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
