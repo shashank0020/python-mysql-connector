@@ -40,6 +40,10 @@ class erp_mysql(osv.osv):
             return False
         return True
     
+    def _links_get(self, cr, uid, context=None):
+        #import ipdb;ipdb.set_trace()
+        return [('sale.order', 'partner_id'), ('product.template', 'name')]    
+    
     _columns = {
         'name': fields.char('Instance Name', select=2,size=64, required=False),
         'host': fields.char('Host Name',size=64, required=False),
@@ -62,8 +66,13 @@ class erp_mysql(osv.osv):
     ('negotiation','Negotiation')
     ], 'Stage', readonly=True),
     'x_int': fields.integer('x_int'),                
-        
-    }
+    'start_date': fields.date('Start Date'),
+    'end_date': fields.datetime('End Date'),
+    'ref': fields.reference('Event Ref', selection=_links_get, size=128),
+    #'order':fields.many2one('sale.order','Order',ondelete='cascade')
+    'partner_id': fields.many2one('res.partner', 'Customer',ondelete='set null'),
+    'many':fields.many2many('product.product','rel_erp_sql','erp_id','so_id')
+        }
     _log_access=True
     _order='name'
     _rec_name='host'
@@ -75,10 +84,11 @@ class erp_mysql(osv.osv):
 }                     
     
 
+
     
     
     def mymod_new(self, cr, uid, ids):
-        import ipdb;ipdb.set_trace()
+        
         
         self.write(cr, uid, ids, { 'state' : 'new' })
         return True
