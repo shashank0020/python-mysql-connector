@@ -40,9 +40,21 @@ class erp_mysql(osv.osv):
             return False
         return True
     
+    
     def _links_get(self, cr, uid, context=None):
         #import ipdb;ipdb.set_trace()
-        return [('sale.order', 'partner_id'), ('product.template', 'name')]    
+        return [('sale.order', 'partner_id'), ('product.template', 'name')]
+    
+    
+    def _my_fun(self,cr,uid,ids,fields,arg,context):
+        
+        obj=self.pool.get('sale.order')
+        
+        #res1=obj.search(cr,uid,[],order='partner_id')
+        import ipdb;ipdb.set_trace()
+        res1=obj.read_group(cr,uid,[],['name'])[{'origin':'draft'}]
+        res= {ids[0]: 'shazz'}
+        return res 
     
     _columns = {
         'name': fields.char('Instance Name', select=2,size=64, required=False),
@@ -71,7 +83,20 @@ class erp_mysql(osv.osv):
     'ref': fields.reference('Event Ref', selection=_links_get, size=128),
     #'order':fields.many2one('sale.order','Order',ondelete='cascade')
     'partner_id': fields.many2one('res.partner', 'Customer',ondelete='set null'),
-    'many':fields.many2many('product.product','rel_erp_sql','erp_id','so_id')
+    'many':fields.many2many('product.product','rel_erp_sql','erp_id','so_id'),
+    'property_product_pricelist_purchase': fields.property(
+          'product.pricelist',
+          type='many2one', 
+          relation='product.pricelist', 
+          domain=[('type','=','purchase')],
+          string="Purchase Pricelist", 
+          view_load=True,
+          help="This pricelist will be used, instead of the default one, for purchases from the current partner"),
+    'funct_field': fields.function(_my_fun, string='# of Purchase Order', type='char'),
+    'sale_id': fields.many2one('sale.order', 'sale order'),
+    'ware_pack_type': fields.related('sale_id', 'origin',type='char', relation='sale.order', readonly=True, store=True, string='Packaging Type'),
+           
+       
         }
     _log_access=True
     _order='name'
