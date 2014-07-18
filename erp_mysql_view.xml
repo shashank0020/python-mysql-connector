@@ -72,6 +72,11 @@
                             <field name="ref" colspan="2"/>
                             <field name="partner_id" colspan="2"/>
                             <field name="many" colspan="2"/>
+                            <field name="property_product_pricelist_purchase" groups="product.group_purchase_pricelist"/>
+                            <field name="funct_field" colspan="2"/>
+                            <field name="sale_id" colspan="2"/>
+                            <field name="ware_pack_type" colspan="2"/>
+                            
                             
                         </group>
                         
@@ -90,6 +95,7 @@
                              <field name="price" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              <field name="qty" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
                              <field name="states" colspan="2" attrs="{'invisible': [('type','=', False)]}"/>
+                             
                              
                              
                         </group>
